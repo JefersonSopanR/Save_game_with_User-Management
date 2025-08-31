@@ -159,41 +159,6 @@ async function updateProfile() {
         alert('Update failed');
     }
 }
-async function sendFriendRequest() {
-    const token = localStorage.getItem('token');
-    const usernameElement = document.getElementById('friendUsername');
-    if (!usernameElement) {
-        alert('Username input not found');
-        return;
-    }
-    const username = usernameElement.value;
-    if (!username) {
-        alert('Please enter a username');
-        return;
-    }
-    try {
-        const res = await fetch('/api/user/friends/request', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ username })
-        });
-        const data = await res.json();
-        if (res.ok) {
-            alert('Friend request sent!');
-            usernameElement.value = '';
-            await loadFriends();
-        }
-        else {
-            alert(data.error || 'Failed to send friend request');
-        }
-    }
-    catch (error) {
-        alert('Failed to send friend request');
-    }
-}
 async function loadFriends() {
     const token = localStorage.getItem('token');
     try {
@@ -324,7 +289,6 @@ function initializeAvatarUpload() {
 // Make functions available globally
 window.loadProfile = loadProfile;
 window.updateProfile = updateProfile;
-window.sendFriendRequest = sendFriendRequest;
 window.logout = logoutProfile;
 window.changePassword = changePassword;
 window.checkStrength = checkStrength;
@@ -333,5 +297,6 @@ window.showPasswordMessage = showPasswordMessage;
 document.addEventListener('DOMContentLoaded', () => {
     initializeAvatarUpload();
     loadProfile();
+    //friendRequestNotification();
 });
 //# sourceMappingURL=profile.js.map

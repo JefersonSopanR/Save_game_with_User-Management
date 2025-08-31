@@ -32,9 +32,6 @@ interface GameEndData {
     winner: string;
     finalScore: string;
 }
-declare const io: any;
-declare const token: string | null;
-declare const socket: any;
 declare const canvas: HTMLCanvasElement;
 declare const ctx: CanvasRenderingContext2D;
 declare let gameState: GameState | null;

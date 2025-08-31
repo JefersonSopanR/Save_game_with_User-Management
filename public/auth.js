@@ -26,6 +26,9 @@ function logoutUser() {
     localStorage.removeItem('token');
     window.location.href = '/login.html';
 }
+//document.addEventListener('DOMContentLoaded', () => {
+//   //friendRequestNotification();
+//});
 // Make functions available globally
 window.checkAuth = checkAuth;
 window.logout = logoutUser;

@@ -147,59 +147,95 @@ export async function updateProfile(req, reply) {
 //  }
 //}
 
-//export async function sendFriendRequest(req, reply) {
-//  const { friendUsername } = req.body;
-//  try {
-//    const friend = await User.findOne({ where: { username: friendUsername } });
-//    if (!friend) return reply.code(404).send({ error: 'User not found' });
-//    if (friend.id === req.user.id) return reply.code(400).send({ error: 'Cannot add yourself as friend' });
+export async function sendFriendRequest(req, reply) {
+  const { friendUsername } = req.body;
+  console.log(`BACK-END     friend request sent to ${friendUsername}!`)
+  try {
+    const friend = await User.findOne({ where: { username: friendUsername } });
+    if (!friend) return reply.code(404).send({ error: 'User not found' });
+    if (friend.id === req.user.id) return reply.code(400).send({ error: 'Cannot add yourself as friend' });
 
-//    // Check if friendship already exists
-//    const existingFriendship = await Friendship.findOne({
-//      where: {
-//        [Op.or]: [
-//          { userId: req.user.id, friendId: friend.id },
-//          { userId: friend.id, friendId: req.user.id }
-//        ]
-//      }
-//    });
+    // Check if friendship already exists
+    const existingFriendship = await Friendship.findOne({
+      where: {
+        [Op.or]: [
+          { userId: req.user.id, friendId: friend.id },
+          { userId: friend.id, friendId: req.user.id }
+        ]
+      }
+    });
 
-//    if (existingFriendship) {
-//      return reply.code(400).send({ error: 'Friendship request already exists' });
-//    }
+    if (existingFriendship) {
+      console.log('Friendship already exists:', existingFriendship);
+      return reply.code(400).send({ error: 'Friendship request already exists' });
+    }
 
-//    await Friendship.create({
-//      userId: req.user.id,
-//      friendId: friend.id,
-//      status: 'pending'
-//    });
+    await Friendship.create({
+      userId: req.user.id,
+      friendId: friend.id,
+      status: 'pending'
+    });
+    
+    // check if friend is online
+    const friendSocketId = req.server.onlineUsers.get(friend.id);
+  if (friendSocketId) {
+    req.server.io.to(friendSocketId).emit("sendFriendRequest", {
+      from: req.user.username,
+      to: friend.username
+    });
+  }
+    reply.send({ message: 'Friend request sent successfully' });
+  } catch (error) {
+    console.error("❌ sendFriendRequest error:", error);
+    reply.code(500).send({ error: 'Failed to send friend request' });
+  }
+}
 
-//    reply.send({ message: 'Friend request sent successfully' });
-//  } catch (error) {
-//    reply.code(500).send({ error: 'Failed to send friend request' });
-//  }
-//}
+export async function respondToFriendRequest(req, reply) {
+  const { requestId, action } = req.body; // action: 'accept' or 'reject'
+  try {
+    const friendship = await Friendship.findOne({
+      where: { id: requestId, friendId: req.user.id, status: 'pending' }
+    });
 
-//export async function respondToFriendRequest(req, reply) {
-//  const { requestId, action } = req.body; // action: 'accept' or 'reject'
-//  try {
-//    const friendship = await Friendship.findOne({
-//      where: { id: requestId, friendId: req.user.id, status: 'pending' }
-//    });
+    if (!friendship) return reply.code(404).send({ error: 'Friend request not found' });
 
-//    if (!friendship) return reply.code(404).send({ error: 'Friend request not found' });
+    if (action === 'accept') {
+      await friendship.update({ status: 'accepted' });
+      reply.send({ message: 'Friend request accepted' });
+    } else {
+      await friendship.destroy();
+      reply.send({ message: 'Friend request rejected' });
+    }
+  } catch (error) {
+    reply.code(500).send({ error: 'Failed to respond to friend request' });
+  }
+}
 
-//    if (action === 'accept') {
-//      await friendship.update({ status: 'accepted' });
-//      reply.send({ message: 'Friend request accepted' });
-//    } else {
-//      await friendship.destroy();
-//      reply.send({ message: 'Friend request rejected' });
-//    }
-//  } catch (error) {
-//    reply.code(500).send({ error: 'Failed to respond to friend request' });
-//  }
-//}
+export async function getFriendRequests(req, reply) {
+  try {
+    const friendRequest = await Friendship.findAll({
+      where: {
+        [Op.or]: [
+          { friendId: req.user.id, status: 'pending' }
+        ]
+      },
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'username', 'displayName', 'avatar', 'isOnline', 'lastSeen']
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 20
+    })
+    reply.send({friendRequest});
+  }
+  catch (error) {
+    reply.code(500).send({ error: 'Failed to get friend-Requests' });
+  }
+}
 
 export async function getFriends(req, reply) {
   try {

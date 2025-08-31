@@ -10,7 +10,7 @@ interface UserProfile {
 }
 
 interface Friend {
-    id: string;
+    id: number;
     username: string;
     displayName?: string;
     status: string;
@@ -217,45 +217,6 @@ async function updateProfile(): Promise<void> {
     }
 }
 
-async function sendFriendRequest(): Promise<void> {
-    const token = localStorage.getItem('token');
-    const usernameElement = document.getElementById('friendUsername') as HTMLInputElement;
-    
-    if (!usernameElement) {
-        alert('Username input not found');
-        return;
-    }
-    
-    const username = usernameElement.value;
-    
-    if (!username) {
-        alert('Please enter a username');
-        return;
-    }
-
-    try {
-        const res = await fetch('/api/user/friends/request', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ username })
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-            alert('Friend request sent!');
-            usernameElement.value = '';
-            await loadFriends();
-        } else {
-            alert(data.error || 'Failed to send friend request');
-        }
-    } catch (error) {
-        alert('Failed to send friend request');
-    }
-}
-
 async function loadFriends(): Promise<void> {
     const token = localStorage.getItem('token');
     try {
@@ -390,7 +351,6 @@ function initializeAvatarUpload(): void {
 // Make functions available globally
 (window as any).loadProfile = loadProfile;
 (window as any).updateProfile = updateProfile;
-(window as any).sendFriendRequest = sendFriendRequest;
 (window as any).logout = logoutProfile;
 (window as any).changePassword = changePassword;
 (window as any).checkStrength = checkStrength;
@@ -401,4 +361,5 @@ function initializeAvatarUpload(): void {
 document.addEventListener('DOMContentLoaded', () => {
     initializeAvatarUpload();
     loadProfile();
+    //friendRequestNotification();
 });

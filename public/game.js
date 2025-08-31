@@ -1,7 +1,4 @@
 "use strict";
-// Get authentication token
-const token = localStorage.getItem('token');
-const socket = io({ auth: { token } });
 socket.on("lobbyUpdate", (rooms) => {
     const lobbyDiv = document.getElementById("lobby");
     if (!lobbyDiv)

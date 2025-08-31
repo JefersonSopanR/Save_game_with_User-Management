@@ -41,6 +41,10 @@ function logoutUser(): void {
     window.location.href = '/login.html';
 }
 
+//document.addEventListener('DOMContentLoaded', () => {
+//   //friendRequestNotification();
+//});
+
 // Make functions available globally
 (window as any).checkAuth = checkAuth;
 (window as any).logout = logoutUser;

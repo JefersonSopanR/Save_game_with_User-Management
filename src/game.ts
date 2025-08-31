@@ -40,13 +40,6 @@ interface GameEndData {
   finalScore: string;
 }
 
-// Declare global io function
-declare const io: any;
-
-// Get authentication token
-const token: string | null = localStorage.getItem('token');
-const socket = io({ auth: { token } });
-
 socket.on("lobbyUpdate", (rooms: LobbyRoom[]) => {
     const lobbyDiv = document.getElementById("lobby");
     if (!lobbyDiv) return;

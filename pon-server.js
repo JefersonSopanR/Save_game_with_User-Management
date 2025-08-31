@@ -15,11 +15,12 @@ import {
   authenticate, 
   updateProfile, 
 //  getUserProfile, 
-//  sendFriendRequest, 
-//  respondToFriendRequest, 
+  sendFriendRequest, 
+  respondToFriendRequest,
+  getFriendRequests, 
   getFriends, 
   getMatchHistory, 
-  changePassword
+  changePassword,
 } from './backend/auth.js';
 import { initializeDatabase, Match, User } from './backend/db.js';
 
@@ -50,12 +51,14 @@ app.put('/api/user/profile', { preHandler: authenticate }, updateProfile);
 app.put('/api/user/profile/changePassword', { preHandler: authenticate }, changePassword);
 //app.get('/api/user/profile/:userId', { preHandler: authenticate }, getUserProfile);
 app.get('/api/user/friends', { preHandler: authenticate }, getFriends);
-//app.post('/api/user/friend-request', { preHandler: authenticate }, sendFriendRequest);
-//app.post('/api/user/friend-response', { preHandler: authenticate }, respondToFriendRequest);
+app.get('/api/user/friend-getFriendRequests', { preHandler: authenticate }, getFriendRequests);
+app.post('/api/user/friend-request', { preHandler: authenticate }, sendFriendRequest);
+app.post('/api/user/friend-response', { preHandler: authenticate }, respondToFriendRequest);
 app.get('/api/user/match-history', { preHandler: authenticate }, getMatchHistory);
 
 // Create Socket.IO server
 const io = new Server(app.server);
+app.decorate('io', io);
 
 // Game rooms
 //gameRooms is an object so it store data as key-value pairs 
@@ -145,9 +148,18 @@ io.use(async (socket, next) => {
     }
 });
 
+// Store online users
+app.decorate('onlineUsers', new Map()); // userId -> socketId
+
 // Socket.IO connection
 io.on("connection", (socket) => {
     console.log("🎮 Player connected:", socket.user.username);
+
+     const userId = socket.user.id; // assuming you decode token
+     app.onlineUsers.set(userId, socket.id);
+
+    // 👇 Join the user’s personal room (based on their ID)
+    socket.join(socket.user.id);
 
     // Send current lobby info
     socket.emit("lobbyUpdate", getLobbyInfo());
@@ -240,6 +252,7 @@ io.on("connection", (socket) => {
 
     // Handle disconnect
     socket.on("disconnect", () => {
+        //onlineUsers.delete(userId);
 		const roomId = socket.roomId;
 		if (!roomId || !gameRooms[roomId]) return;
 

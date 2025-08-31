@@ -16,7 +16,6 @@ interface userDataType {
 	password: string;
 }
 
-
 function showTab(tabName: "login" | "register"): void {
     // Reset all tab buttons to inactive state
     const tabButtons = document.querySelectorAll<HTMLButtonElement>('button[onclick*="showTab"]');
@@ -125,7 +124,6 @@ async function register(event?: SubmitEvent): Promise<void> {
 	}
 
 }
-
 /**
  * Generalized Login handler
  */
@@ -195,6 +193,7 @@ function showMessage(text: string, type: "success" | "error"): void {
         messageDiv.innerHTML = "";
     }, 5000);
 }
+
 
 // Make functions available globally
 (window as any).register = register;

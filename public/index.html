@@ -22,6 +22,11 @@
     <a href="/settings.html" class="rounded-full bg-pong-green flex items-center justify-center font-bold">
       ⚙️Settings
     </a>
+    <a href="/friendsRequest.html" class="p-2 rounded-full bg-gray-700 flex items-center justify-center hover:bg-pong-green transition">
+			<div id="friendsRequest">
+				friend request
+			</div>
+		</a>
     <button onclick="logout()" class="rounded-full bg-pong-green flex items-center justify-center font-bold">
       ⏻Logout
     </button>
@@ -87,6 +92,7 @@
 
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="initializeSocket.js"></script>
   <script src="game.js"></script>
   <script src="auth.js"></script>
   <script>
