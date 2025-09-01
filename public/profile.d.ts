@@ -12,6 +12,7 @@ interface Friend {
     username: string;
     displayName?: string;
     status: string;
+    email: string;
 }
 interface Match {
     id: string;

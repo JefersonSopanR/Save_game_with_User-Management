@@ -3,6 +3,10 @@ async function loadFriendProfile() {
     const params = new URLSearchParams(window.location.search);
     const friendId = params.get('id');
     const token = localStorage.getItem('token');
+    if (!checkAuthToken()) {
+        logoutUser();
+        alert(`Auth check failed`);
+    }
     if (!friendId || !token)
         return;
     try {

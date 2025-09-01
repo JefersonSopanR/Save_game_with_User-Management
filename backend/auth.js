@@ -224,7 +224,7 @@ export async function getFriendRequests(req, reply) {
         {
           model: User,
           as: 'User',
-          attributes: ['id', 'username', 'displayName', 'avatar', 'isOnline', 'lastSeen']
+          attributes: ['id', 'username', 'displayName', 'avatar', 'isOnline', 'lastSeen', 'email']
         }
       ],
       order: [['createdAt', 'DESC']],

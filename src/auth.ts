@@ -13,6 +13,27 @@ interface LoginResponse {
     error?: string;
 }
 
+async function checkAuthToken(): Promise<boolean>{
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return false;
+    }
+    try {
+        const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    } catch (error) {
+        console.error('Auth check failed:', error);
+        return false;
+    }
+}
+
 // Check authentication and set welcome message
 async function checkAuth(): Promise<void> {
     const token = localStorage.getItem('token');
@@ -31,7 +52,7 @@ async function checkAuth(): Promise<void> {
             }
         } catch (error) {
             console.error('Auth check failed:', error);
-            window.location.href = '/login.html';
+            logoutUser();
         }
     }
 }
@@ -48,3 +69,4 @@ function logoutUser(): void {
 // Make functions available globally
 (window as any).checkAuth = checkAuth;
 (window as any).logout = logoutUser;
+(window as any).checkAuthToken = checkAuthToken;

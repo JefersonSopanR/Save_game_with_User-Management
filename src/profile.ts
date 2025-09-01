@@ -14,6 +14,7 @@ interface Friend {
     username: string;
     displayName?: string;
     status: string;
+    email: string
 }
 
 interface Match {
@@ -237,12 +238,12 @@ async function loadFriends(): Promise<void> {
         if (data.friends && data.friends.length > 0) {
             data.friends.forEach(friend => {
                 const friendElement = document.createElement('div');
-                friendElement.className = 'friend-item bg-gray-100 p-3 rounded-lg flex justify-between items-center';
+                friendElement.className = 'friend-item bg-indigo-600 p-3 rounded-lg flex justify-between items-center';
                 friendElement.innerHTML = `
-                    <button class="w-full text-left px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                    <button class="w-full text-left px-4 py-2 bg-indigo-600 rounded-lg hover:bg-gray-200 transition"
                         onclick="ShowFriendProfile('${friend.id}')">
                         <span class="font-medium">${friend.displayName || friend.username}</span>
-                        <span class="text-sm text-gray-500 ml-2">(${friend.status})</span>
+                        <span class="text-sm text-gray-500 ml-2">(gmail: ${friend.email})</span>
                     </button>
                 `;
                 friendsList.appendChild(friendElement);
@@ -364,7 +365,10 @@ function initializeAvatarUpload(): void {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    if (!checkAuthToken())
+        logoutUser();
     initializeAvatarUpload();
     loadProfile();
+    loadFriends();
     //friendRequestNotification();
 });

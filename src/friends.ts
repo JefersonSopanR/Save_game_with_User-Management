@@ -133,7 +133,16 @@ async function showFriendRequests() {
             // Clear any existing requests
             container.innerHTML = '';
 
-            // Display each friend request
+			// Display each friend request
+			if (!friendRequests.length) {
+				container.innerHTML = `
+					<div class="bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center">
+						<p class="text-lg font-semibold text-gray-300 mb-2">No Friend Requests</p>
+						<p class="text-sm text-gray-400">You don't have any friend requests at the moment.</p>
+					</div>
+				`;
+				return;
+			}
 			friendRequests.forEach((request: any) => {
 				const requestElement = document.createElement('div');
 				requestElement.classList.add('friend-request');
@@ -148,7 +157,6 @@ async function showFriendRequests() {
 					<div class="flex items-center">
 							<p class="font-semibold">${request.User.displayName}</p>
 							<p class="text-sm text-gray-400">${request.User.username}</p>
-						</div>
 					</div>
 					<div class="flex space-x-4">
 						<button onclick="respondToFriendRequest(${request.id}, 'accept')" class="px-4 py-2 bg-green-500 rounded-full">Accept</button>
@@ -176,5 +184,7 @@ async function showFriendRequests() {
 (window as any).showFriendRequests = showFriendRequests;
 
 document.addEventListener('DOMContentLoaded', () => {
+	if (!checkAuthToken())
+		logoutUser();
 	showFriendRequests();
 });
