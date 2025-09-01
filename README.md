@@ -2,6 +2,12 @@
 
 A real-time multiplayer Pong game built with Node.js, Socket.io, TypeScript, and Tailwind CSS.
 
+## Recent Updates
+
+- **Show Friend Profile Page:** You can now view detailed profiles of your friends by clicking their name in your friends list. This opens a dedicated page (`showFriendProfile.html`) displaying their stats, avatar, and recent matches.
+- **Improved Button Styles:** Friend profile buttons and other UI elements have updated styles for better clarity and user experience.
+- **Authentication Check:** All main pages now use `checkAuthToken()` to ensure only authenticated users can access protected content.
+
 ## Technologies Used
 
 ### Backend
@@ -42,6 +48,11 @@ A real-time multiplayer Pong game built with Node.js, Socket.io, TypeScript, and
 - **Match Recording**: All games are automatically saved to database
 - **Statistics Updates**: User win/loss stats updated after each game
 
+### 👥 Social & Profile Features
+- **Show Friend Profile:** View any friend's profile, stats, and match history on a dedicated page.
+- **Consistent Auth Checks:** All pages verify authentication before loading user data.
+- **Improved UI:** Button styles and layout enhancements for friend-related actions.
+
 ### 🔐 Security Features
 - **JWT Authentication**: Secure token-based authentication
 - **Password Hashing**: bcrypt password hashing for security
@@ -63,6 +74,7 @@ A real-time multiplayer Pong game built with Node.js, Socket.io, TypeScript, and
 - `POST /api/user/friend-request` - Send friend request
 - `POST /api/user/friend-response` - Respond to friend request
 - `GET /api/user/match-history` - Get user's match history
+- `POST /api/user/friend-profile` - Get a friend's profile by ID
 
 ## Database Schema
 
@@ -87,6 +99,7 @@ A real-time multiplayer Pong game built with Node.js, Socket.io, TypeScript, and
    - Friends list with online status
    - Match history
    - Avatar upload
+4. **Show Friend Profile Page** (`/showFriendProfile.html`) - Displays another user's profile, stats, and match history.
 
 ## Technologies Used
 
@@ -149,6 +162,7 @@ Open browser and navigate to:
 - Login: `http://localhost:3000/login.html`
 - Game: `http://localhost:3000`
 - Profile: `http://localhost:3000/profile.html`
+- Show Friend Profile: `http://localhost:3000/showFriendProfile.html?id=<friendId>`
 
 ## File Structure
 
@@ -171,6 +185,7 @@ Open browser and navigate to:
     ├── index.html       # Main game page
     ├── login.html       # Login/register page
     ├── profile.html     # User profile page
+    ├── showFriendProfile.html # Friend profile page
     ├── style.css        # Compiled Tailwind CSS
     ├── *.js             # Compiled TypeScript files
     └── *.js.map         # Source maps
@@ -197,6 +212,7 @@ Open browser and navigate to:
 - View friends' online status
 - See when friends were last active
 - Friend request system with accept/reject
+- View detailed friend profiles and match history
 
 ### Match History
 - Complete history of all 1v1 games
