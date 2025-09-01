@@ -114,38 +114,38 @@ export async function updateProfile(req, reply) {
   }
 }
 
-//export async function getUserProfile(req, reply) {
-//  const { userId } = req.params;
-//  try {
-//    const user = await User.findByPk(userId, {
-//      attributes: { exclude: ['password', 'email'] }
-//    });
+export async function getUserProfile(req, reply) {
+  const { userId } = req.params;
+  try {
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ['password'] }
+    });
     
-//    if (!user) return reply.code(404).send({ error: 'User not found' });
+    if (!user) return reply.code(404).send({ error: 'User not found' });
     
-//    // Get recent matches separately to avoid complex joins
-//    const recentMatches = await Match.findAll({
-//      where: {
-//        [Op.or]: [
-//          { player1Id: userId },
-//          { player2Id: userId }
-//        ]
-//      },
-//      limit: 10,
-//      order: [['createdAt', 'DESC']],
-//      include: [
-//        { model: User, as: 'Player1', attributes: ['username', 'displayName'] },
-//        { model: User, as: 'Player2', attributes: ['username', 'displayName'] },
-//        { model: User, as: 'Winner', attributes: ['username', 'displayName'] }
-//      ]
-//    });
+    // Get recent matches separately to avoid complex joins
+    const recentMatches = await Match.findAll({
+      where: {
+        [Op.or]: [
+          { player1Id: userId },
+          { player2Id: userId }
+        ]
+      },
+      limit: 10,
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, as: 'Player1', attributes: ['username', 'displayName'] },
+        { model: User, as: 'Player2', attributes: ['username', 'displayName'] },
+        { model: User, as: 'Winner', attributes: ['username', 'displayName'] }
+      ]
+    });
     
-//    reply.send({ user: { ...user.toJSON(), recentMatches } });
-//  } catch (error) {
-//    console.error('Get user profile error:', error);
-//    reply.code(500).send({ error: 'Failed to fetch user profile' });
-//  }
-//}
+    reply.send({ user: { ...user.toJSON(), recentMatches } });
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    reply.code(500).send({ error: 'Failed to fetch user profile' });
+  }
+}
 
 export async function sendFriendRequest(req, reply) {
   const { friendUsername } = req.body;

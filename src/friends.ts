@@ -105,6 +105,7 @@ async function getFriends(): Promise<Friend[] | null> {
 
 socket.on("sendFriendRequest", (requestRecieve: friendRequest) => {
 	console.log(`FROM:	"${requestRecieve.from}"\nTO:	"${requestRecieve.to}"`);
+	alert(`You have a Friend Request from ${requestRecieve.from}`);
 	
 })
 

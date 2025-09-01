@@ -84,6 +84,7 @@ async function getFriends() {
 }
 socket.on("sendFriendRequest", (requestRecieve) => {
     console.log(`FROM:	"${requestRecieve.from}"\nTO:	"${requestRecieve.to}"`);
+    alert(`You have a Friend Request from ${requestRecieve.from}`);
 });
 async function showFriendRequests() {
     console.log("SHOWING FREINREQUESTS!!!");

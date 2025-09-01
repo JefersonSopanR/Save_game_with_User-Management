@@ -217,6 +217,10 @@ async function updateProfile(): Promise<void> {
     }
 }
 
+function ShowFriendProfile(friendId: number): void {
+    window.location.href = `/showFriendProfile.html?id=${friendId}`;
+}
+ 
 async function loadFriends(): Promise<void> {
     const token = localStorage.getItem('token');
     try {
@@ -235,10 +239,11 @@ async function loadFriends(): Promise<void> {
                 const friendElement = document.createElement('div');
                 friendElement.className = 'friend-item bg-gray-100 p-3 rounded-lg flex justify-between items-center';
                 friendElement.innerHTML = `
-                    <div>
+                    <button class="w-full text-left px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                        onclick="ShowFriendProfile('${friend.id}')">
                         <span class="font-medium">${friend.displayName || friend.username}</span>
                         <span class="text-sm text-gray-500 ml-2">(${friend.status})</span>
-                    </div>
+                    </button>
                 `;
                 friendsList.appendChild(friendElement);
             });

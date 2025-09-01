@@ -36,6 +36,7 @@ declare function showPasswordMessage(message: string, type: "success" | "error")
 declare function checkStrength(): void;
 declare function changePassword(event?: SubmitEvent): Promise<void>;
 declare function updateProfile(): Promise<void>;
+declare function ShowFriendProfile(friendId: number): void;
 declare function loadFriends(): Promise<void>;
 declare function loadMatchHistory(): Promise<void>;
 declare function logoutProfile(): Promise<void>;

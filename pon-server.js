@@ -14,7 +14,7 @@ import {
   me, 
   authenticate, 
   updateProfile, 
-//  getUserProfile, 
+  getUserProfile, 
   sendFriendRequest, 
   respondToFriendRequest,
   getFriendRequests, 
@@ -49,7 +49,7 @@ app.get('/api/auth/me', { preHandler: authenticate }, me);
 app.get('/api/user/profile', { preHandler: authenticate }, me); // Get current user's profile (reuse me endpoint)
 app.put('/api/user/profile', { preHandler: authenticate }, updateProfile);
 app.put('/api/user/profile/changePassword', { preHandler: authenticate }, changePassword);
-//app.get('/api/user/profile/:userId', { preHandler: authenticate }, getUserProfile);
+app.get('/api/user/profile/:userId', { preHandler: authenticate }, getUserProfile);
 app.get('/api/user/friends', { preHandler: authenticate }, getFriends);
 app.get('/api/user/friend-getFriendRequests', { preHandler: authenticate }, getFriendRequests);
 app.post('/api/user/friend-request', { preHandler: authenticate }, sendFriendRequest);
