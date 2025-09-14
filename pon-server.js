@@ -47,6 +47,7 @@ app.register(fastifyStatic, {
 // Google OAuth2 setup
 await app.register(oauthPlugin, {
   name: 'googleOAuth2',
+  //The permissions the app requests from Google (basic identity, email, and profile info).
   scope: ['openid', 'email', 'profile'],
   credentials: {
     client: {
@@ -55,8 +56,10 @@ await app.register(oauthPlugin, {
     },
     auth: oauthPlugin.GOOGLE_CONFIGURATION,
   },
+  //The route where users start the Google login flow. Visiting this path redirects them to Google for authentication.
   startRedirectPath: '/auth/google',
-  callbackUri: 'http://localhost:3000/auth/google/callback',
+  //The URL where Google will redirect users after they log in.
+  callbackUri: process.env.GOOGLE_CALLBACK_URL,
 });
 
 
@@ -109,8 +112,8 @@ function createGameState() {
     return {
         ball: { x: 400, y: 200, vx: 2, vy: 2, radius: 10 },
         player1: { x: 10, y: 150, width: 10, height: 100, score: 0 },
-        player2: { x: 780, y: 150, width: 10, height: 100, score: 0 },
-        gameEnded: false
+        player2: { x: 780, y: 150, width: 10, height: 100, score: 0, targetY: 150},
+        gameEnded: false,
     };
 }
 
@@ -143,9 +146,12 @@ setInterval(async () => {
     for (let roomId in gameRooms) {
         const room = gameRooms[roomId];
 
-        if (room.players.length === 2) {
+        if (room.players.length === 2 || room.aiEnabled === true) {		
+			if (room.aiEnabled) {
+                updateAIPaddle(room.gameState.player2, room.aiDifficulty);
+            }	
             await updateGame(room.gameState, roomId);
-            io.to(roomId).emit('gameUpdate', room.gameState);
+            io.to(roomId).emit('gameUpdate', room.gameState, roomId);
         }
 
         if (room.players.length === 0) {
@@ -154,7 +160,56 @@ setInterval(async () => {
             io.emit("lobbyUpdate", getLobbyInfo());
         }
     }
-}, 1000 / 60);
+}, 1000/60);
+
+// ---------------- AI Logic ----------------
+
+//AI Logic with Difficulty
+const DIFFICULTY_SETTINGS = {
+    easy:    { paddleSpeed: 3, errorRange: 40, refreshRate: 1500 }, // slow + big errors
+    medium:  { paddleSpeed: 5, errorRange: 20, refreshRate: 1000 }, // balanced
+    hard:    { paddleSpeed: 8, errorRange: 5,  refreshRate: 500 }   // fast + precise
+};
+
+function refreshAILogic(room) {
+    const { errorRange } = DIFFICULTY_SETTINGS[room.aiDifficulty];
+    const ball = room.gameState.ball;
+    const paddle = room.gameState.player2;
+
+    if (ball.vx > 0) { 
+        const timeToReach = (paddle.x - ball.x) / ball.vx;
+        let predictedY = ball.y + ball.vy * timeToReach;
+
+        predictedY = Math.max(0, Math.min(400 - paddle.height, predictedY));
+        const error = Math.random() * errorRange - errorRange / 2;
+        paddle.targetY = predictedY + error;
+    } else {
+        paddle.targetY = 200 - paddle.height / 2;
+    }
+}
+
+function updateAIPaddle(paddle, difficulty) {
+    const { paddleSpeed } = DIFFICULTY_SETTINGS[difficulty];
+    if (paddle.y < paddle.targetY) {
+        paddle.y += Math.min(paddleSpeed, paddle.targetY - paddle.y);
+    } else if (paddle.y > paddle.targetY) {
+        paddle.y -= Math.min(paddleSpeed, paddle.y - paddle.targetY);
+    }
+}
+
+function startAIInterval(roomId) {
+    const room = gameRooms[roomId];
+    if (!room || !room.aiEnabled) return;
+
+    const { refreshRate } = DIFFICULTY_SETTINGS[room.aiDifficulty];
+
+    // Clear old timer if exists
+    if (room.aiTimer) clearInterval(room.aiTimer);
+
+    room.aiTimer = setInterval(() => {
+        refreshAILogic(room);
+    }, refreshRate);
+}
 
 // Protect socket with JWT
 io.use(async (socket, next) => {
@@ -186,54 +241,69 @@ io.on("connection", (socket) => {
     // Send current lobby info
     socket.emit("lobbyUpdate", getLobbyInfo());
 
-    socket.on("joinRoom", (requestedRoomId) => {
+    socket.on("joinRoom", (requestedRoomId, startGame, { mode }) => {
+
+		if (!startGame) {
+			socket.emit("chooseOpponent");
+			return ;
+		}
+		const checkRoom = gameRooms[requestedRoomId];
+		//here we can stop users from entering a room where AI mode is activated!
+		if (checkRoom && (checkRoom.players.length === 2 || checkRoom.aiEnabled === true)) {
+			const existingPlayer = checkRoom.players.find(p => p.userId === socket.user.id);
+			if (!existingPlayer) {
+				socket.emit("checkRoomStatus", {
+				roomId: requestedRoomId,
+				status: "roomFull",
+				message: `The ${requestedRoomId} is full!`,
+				isPlayer1: false })
+				console.log("checking RoomStatus: ->roomFull");
+				return ;
+			}
+		}
+		if (checkRoom) {
+			const existingPlayer = checkRoom.players.find(p => p.userId === socket.user.id);
+
+			if (existingPlayer) {
+				socket.join(requestedRoomId);
+				socket.roomId = requestedRoomId;
+				socket.isPlayer1 = existingPlayer.isPlayer1;
+				socket.emit("checkRoomStatus",  {
+					roomId: requestedRoomId,
+					status: "updateRoom",
+					message: `You are in the ${requestedRoomId}!`,
+					isPlayer1: existingPlayer.isPlayer1
+				});
+				console.log("checking RoomStatus: ->updateRoom");
+				return ;
+			}
+		}
+		
 		let roomId = requestedRoomId || createRoomId();
 
         // Create room if it doesn't exist
+		if (mode === "AI") {
+			gameRooms[roomId] = {
+				players: [],
+				gameState: createGameState(),
+				startTime: Date.now(),
+				aiEnabled: true,
+				aiDifficulty: "medium"
+				
+			}
+		}
         if (!gameRooms[roomId]) {
             gameRooms[roomId] = 
             {
                 players: [],
                 gameState: createGameState(),
                 startTime: Date.now(),
+				aiEnabled: false,
             };
             console.log(`🆕 Room created: ${roomId}`);
         }
 
 		const room = gameRooms[roomId];
-
-		// ✅ Check if this user is already in the room (reconnect case)
-		const existingPlayer = room.players.find(p => p.userId === socket.user.id);
-		if (existingPlayer) {
-			existingPlayer.id = socket.id;
-			existingPlayer.disconnected = false;
-
-            console.log(`----------->    existing Player id: ${existingPlayer.id}`)
-			if (existingPlayer.disconnectTimer) {
-				clearTimeout(existingPlayer.disconnectTimer);
-				delete existingPlayer.disconnectTimer;
-			}
-
-			socket.join(roomId);
-			socket.roomId = roomId;
-			socket.isPlayer1 = existingPlayer.isPlayer1;
-
-			console.log(`✅ ${socket.user.id} reconnected to ${roomId}`);
-
-			socket.emit("gameUpdate", room.gameState);
-            socket.emit("playerAssignment", {
-				isPlayer1: existingPlayer.isPlayer1,
-				roomId,
-				playersInRoom: room.players.length,
-				message: `Room ${roomId} - You are Player ${existingPlayer.isPlayer1 ? "1" : "2"}`
-			});
-
-			socket.to(roomId).emit("opponentReconnected", {
-				message: "✅ Opponent reconnected!"
-			});
-
-			return; // stop here, don’t add them as a new player
-		}
 
 		// 👇 if not reconnecting → normal new player join logic
         //this is handle in the emit("joinRoom") in the fron-end so it can safely be remove
@@ -256,13 +326,30 @@ io.on("connection", (socket) => {
 			message: `Room ${roomId} - You are Player ${isPlayer1 ? "1" : "2"}`
 		});
 
-		io.emit("lobbyUpdate", getLobbyInfo());
-
-		if (room.players.length === 2) {
+		if (mode === "AI") {
+            startAIInterval(roomId);
 			io.to(roomId).emit("gameReady", { message: `Game ready in ${roomId}!` });
 		}
+		else if (room.players.length === 2) {
+			io.to(roomId).emit("gameReady", { message: `Game ready in ${roomId}!` });
+		}
+		else {
+			socket.emit("waitingForPlayer", {
+                message: `Waiting for an opponent to join room ${roomId}...`
+            });
+		}
+		io.emit("lobbyUpdate", getLobbyInfo());
+
 	});
 
+	socket.on('setDifficulty', (data, roomId) => {
+        const room = gameRooms[roomId];
+        if (room && ["easy", "medium", "hard"].includes(data.level)) {
+            room.aiDifficulty = data.level;
+            console.log(`🎚️ Difficulty for ${roomId} set to ${data.level}`);
+            startAIInterval(roomId); // restart with new refreshRate
+        }
+    });
 
     // Paddle movement
     socket.on("paddleMove", (data) => {
@@ -291,56 +378,20 @@ io.on("connection", (socket) => {
 			socket.to(roomId).emit("opponentDisconnected", {
 				message: "⚠️ Opponent disconnected. Waiting 10s for them to return..."
 			});
+			room.players = room.players.filter(p => p.userId !== player.userId);
 
-			// start grace timer
-			player.disconnectTimer = setTimeout(() => {
-				const stillDisconnected = room.players.find(
-					p => p.userId === player.userId && p.disconnected
-				);
+			if (room.players.length === 0) {
+				delete gameRooms[roomId];
+				releaseRoomId(roomId);
+				console.log(`🗑️ Room ${roomId} deleted`);
+			} else {
+				io.to(roomId).emit("opponentLeft", { message: "Opponent left the game." });
+			}
 
-				if (stillDisconnected) {
-					console.log(`❌ ${player.userId} did not return, removing from ${roomId}`);
-					room.players = room.players.filter(p => p.userId !== player.userId);
-
-					if (room.players.length === 0) {
-						delete gameRooms[roomId];
-						console.log(`🗑️ Room ${roomId} deleted`);
-					} else {
-						io.to(roomId).emit("opponentLeft", { message: "Opponent left the game." });
-					}
-
-					io.emit("lobbyUpdate", getLobbyInfo());
-				}
-			}, 5000); // 10s grace
+			io.emit("lobbyUpdate", getLobbyInfo());
 		}
 	});
 
-	socket.on("continueVote", ({ roomId, vote }) => {
-        if (!gameRooms[roomId]) return;
-
-        const room = gameRooms[roomId];
-        room.continueVotes[socket.user.id] = vote; // "yes" or "no"
-
-        //If any player already voted "no" → stop immediately
-        if (Object.values(room.continueVotes).some(v => v === "no")) {
-            io.to(roomId).emit("gameClosed", {
-                message: "Game ended. At least one player declined."
-            });
-            delete gameRooms[roomId];
-            return;
-        }
-
-        //Only restart if both have voted and both are "yes"
-        if (Object.keys(room.continueVotes).length === 2) {
-            if (Object.values(room.continueVotes).every(v => v === "yes")) {
-                room.gameState = createGameState();
-                io.to(roomId).emit("gameRestarted", {
-                    message: "Both players agreed! Restarting..."
-                });
-                io.to(roomId).emit("gameUpdate", room.gameState);
-            }
-        }
-    });
 
 });
 // Game physics
@@ -402,14 +453,12 @@ async function updateGame(gameState, roomId) {
                 
                 await winnerUser.update({ wins: winnerUser.wins + 1 });
                 await loserUser.update({ losses: loserUser.losses + 1 });
-
-                // reset votes
-                gameRooms[roomId].continueVotes = {};
-                setTimeout(() => {io.to(roomId).emit("continuePrompt", {
-                    message: "Do you want to play again? (Yes/No)"
-                })}, 300)
             }
         }
+		delete gameRooms[roomId];
+		releaseRoomId(roomId);
+		console.log(`🗑️ Room ${roomId} deleted`);
+		io.emit("lobbyUpdate", getLobbyInfo());
     }
 }
 
