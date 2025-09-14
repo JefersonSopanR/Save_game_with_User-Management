@@ -1,3 +1,21 @@
+
+## Getting Started: Google OAuth Setup
+
+To start the game, create a `.env` file in your project root with your Google OAuth credentials:
+
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
+```
+
+**If running in a container, change the redirect URI:**
+
+```env
+GOOGLE_REDIRECT_URI=http://127.0.0.1:80/auth/google/callback
+FRONTEND_URL=http://127.0.0.1:80/login.html
+```
+
 # Pong Game with User Management
 
 A real-time multiplayer Pong game built with Node.js, Socket.io, TypeScript, and Tailwind CSS.
