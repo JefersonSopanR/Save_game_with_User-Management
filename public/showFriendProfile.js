@@ -31,6 +31,7 @@ async function loadFriendProfile() {
 				<p class="text-gray-400 mb-2">Status: ${status}</p>
 				<p class="text-gray-400 mb-2">Email: ${friend.email || 'Hidden'}</p>
 
+				<button onclick="challenge('${friend.username}')" > challenge </button>
 				<h2 class="text-2xl font-bold text-pong-green mt-8 mb-4">Match History</h2>
 				<div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow max-h-96 overflow-y-auto">
 					<div id="matchHistory" class="space-y-3">
@@ -60,6 +61,21 @@ async function loadFriendProfile() {
         if (profileDiv) {
             profileDiv.innerHTML = `<p class="text-red-500">Failed to load friend profile.</p>`;
         }
+    }
+}
+async function challenge(friendUsername) {
+    alert(`${friendUsername}`);
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch('/api/user/challenge', {
+            method: "POST",
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ friendUsername }),
+        });
+        alert("challenge was sent succesfully!");
+    }
+    catch (e) {
+        alert("challeng sent was a failure");
     }
 }
 document.addEventListener('DOMContentLoaded', loadFriendProfile);

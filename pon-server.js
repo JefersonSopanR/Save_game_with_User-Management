@@ -24,6 +24,7 @@ import {
   respondToFriendRequest,
 
   challengeRespond,
+  respondChallenge,
 
   getFriendRequests, 
   getFriends, 
@@ -82,6 +83,7 @@ app.get('/api/user/friends', { preHandler: authenticate }, getFriends);
 app.get('/api/user/friend-getFriendRequests', { preHandler: authenticate }, getFriendRequests);
 
 app.post('/api/user/challenge', { preHandler: authenticate }, challengeRespond);
+app.post('/api/user/friends/challengeRespond', { preHandler: authenticate }, respondChallenge);
 
 app.post('/api/user/friend-request', { preHandler: authenticate }, sendFriendRequest);
 app.post('/api/user/friend-response', { preHandler: authenticate }, respondToFriendRequest);

@@ -222,6 +222,25 @@ async function updateProfile(): Promise<void> {
 function ShowFriendProfile(friendId: number): void {
     window.location.href = `/showFriendProfile.html?id=${friendId}`;
 }
+
+async function acceptChallenge(friendUsername: string) {
+	const token = localStorage.getItem('token');
+
+	if (!token) return ;
+
+	try {
+		const response = await fetch('/api/user/friends/challengeRespond', {
+			method: "POST",
+			headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+			body: JSON.stringify({ friendUsername }),
+		})
+		if (response.ok)
+			console.log("succes!!!");
+	}
+	catch (error) {
+		console.error('Failed to load friends:', error);
+	}
+}
  
 async function loadFriends(): Promise<void> {
     const token = localStorage.getItem('token');
@@ -238,7 +257,7 @@ async function loadFriends(): Promise<void> {
 
         if (data.friends && data.friends.length > 0) {
             data.friends.forEach(friend => {
-				if (friend.challenge === "on") {
+				if (friend.challenge === "off") {
 					const friendElement = document.createElement('div');
 					friendElement.className = 'friend-item bg-indigo-600 p-3 rounded-lg flex justify-between items-center';
 					friendElement.innerHTML = `
@@ -246,9 +265,8 @@ async function loadFriends(): Promise<void> {
 							onclick="ShowFriendProfile('${friend.id}')">
 							<span class="font-medium">${friend.displayName || friend.username}</span>
 							<span class="text-sm text-gray-500 ml-2">(gmail: ${friend.email})</span>
-							<button onclick="acceptChallenge('${friend.username}')" class="text-sm text-gray-500 ml-2">Acept challenge</button>
-
 						</button>
+						<button onclick="acceptChallenge('${friend.username}')" class="text-sm text-gray-500 ml-2">Acept challenge</button>
 					`;
 					friendsList.appendChild(friendElement);
 				} else {

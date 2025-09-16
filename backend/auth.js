@@ -366,4 +366,7 @@ export async function challengeRespond(req, reply) {
 	}
 }
 
+export async function respondChallenge(req, reply) {
+	
+}
 

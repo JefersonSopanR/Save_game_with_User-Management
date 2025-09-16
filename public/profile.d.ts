@@ -13,6 +13,7 @@ interface Friend {
     displayName?: string;
     status: string;
     email: string;
+    challenge: string;
 }
 interface Match {
     id: string;
@@ -38,6 +39,7 @@ declare function checkStrength(): void;
 declare function changePassword(event?: SubmitEvent): Promise<void>;
 declare function updateProfile(): Promise<void>;
 declare function ShowFriendProfile(friendId: number): void;
+declare function acceptChallenge(friendUsername: string): Promise<void>;
 declare function loadFriends(): Promise<void>;
 declare function loadMatchHistory(): Promise<void>;
 declare function initializeAvatarUpload(): void;
