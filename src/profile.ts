@@ -15,6 +15,7 @@ interface Friend {
     displayName?: string;
     status: string;
     email: string
+	challenge: string
 }
 
 interface Match {
@@ -237,16 +238,32 @@ async function loadFriends(): Promise<void> {
 
         if (data.friends && data.friends.length > 0) {
             data.friends.forEach(friend => {
-                const friendElement = document.createElement('div');
-                friendElement.className = 'friend-item bg-indigo-600 p-3 rounded-lg flex justify-between items-center';
-                friendElement.innerHTML = `
-                    <button class="w-full text-left px-4 py-2 bg-indigo-600 rounded-lg hover:bg-gray-200 transition"
-                        onclick="ShowFriendProfile('${friend.id}')">
-                        <span class="font-medium">${friend.displayName || friend.username}</span>
-                        <span class="text-sm text-gray-500 ml-2">(gmail: ${friend.email})</span>
-                    </button>
-                `;
-                friendsList.appendChild(friendElement);
+				if (friend.challenge === "on") {
+					const friendElement = document.createElement('div');
+					friendElement.className = 'friend-item bg-indigo-600 p-3 rounded-lg flex justify-between items-center';
+					friendElement.innerHTML = `
+						<button class="w-full text-left px-4 py-2 bg-indigo-600 rounded-lg hover:bg-gray-200 transition"
+							onclick="ShowFriendProfile('${friend.id}')">
+							<span class="font-medium">${friend.displayName || friend.username}</span>
+							<span class="text-sm text-gray-500 ml-2">(gmail: ${friend.email})</span>
+							<button onclick="acceptChallenge('${friend.username}')" class="text-sm text-gray-500 ml-2">Acept challenge</button>
+
+						</button>
+					`;
+					friendsList.appendChild(friendElement);
+				} else {
+					const friendElement = document.createElement('div');
+					friendElement.className = 'friend-item bg-indigo-600 p-3 rounded-lg flex justify-between items-center';
+					friendElement.innerHTML = `
+						<button class="w-full text-left px-4 py-2 bg-indigo-600 rounded-lg hover:bg-gray-200 transition"
+							onclick="ShowFriendProfile('${friend.id}')">
+							<span class="font-medium">${friend.displayName || friend.username}</span>
+							<span class="text-sm text-gray-500 ml-2">(gmail: ${friend.email})</span>
+					
+						</button>
+					`;
+					friendsList.appendChild(friendElement);
+				}
             });
         } else {
             friendsList.innerHTML = '<p class="text-gray-500">No friends added yet.</p>';
@@ -255,7 +272,6 @@ async function loadFriends(): Promise<void> {
         console.error('Failed to load friends:', error);
     }
 }
-
 async function loadMatchHistory(): Promise<void> {
     const token = localStorage.getItem('token');
     try {

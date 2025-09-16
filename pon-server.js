@@ -22,6 +22,9 @@ import {
   getUserProfile, 
   sendFriendRequest, 
   respondToFriendRequest,
+
+  challengeRespond,
+
   getFriendRequests, 
   getFriends, 
   getMatchHistory, 
@@ -77,6 +80,9 @@ app.put('/api/user/profile/changePassword', { preHandler: authenticate }, change
 app.get('/api/user/profile/:userId', { preHandler: authenticate }, getUserProfile);
 app.get('/api/user/friends', { preHandler: authenticate }, getFriends);
 app.get('/api/user/friend-getFriendRequests', { preHandler: authenticate }, getFriendRequests);
+
+app.post('/api/user/challenge', { preHandler: authenticate }, challengeRespond);
+
 app.post('/api/user/friend-request', { preHandler: authenticate }, sendFriendRequest);
 app.post('/api/user/friend-response', { preHandler: authenticate }, respondToFriendRequest);
 app.get('/api/user/match-history', { preHandler: authenticate }, getMatchHistory);

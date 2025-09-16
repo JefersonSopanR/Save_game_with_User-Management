@@ -298,11 +298,15 @@ export async function getFriends(req, reply) {
       ]
     });
 
+	const challenge = "off";
     const friends = friendships.map(friendship => {
-      return friendship.userId === req.user.id ? friendship.Friend : friendship.User;
+      const friend = friendship.userId === req.user.id ? friendship.Friend : friendship.User;
+	  if (friendship.challenge !== 'off')
+			challenge = "on";
+	  return {...friend.toJSON(), challenge};
     });
 
-    reply.send({ friends });
+    reply.send( {friends} );
   } catch (error) {
     reply.code(500).send({ error: 'Failed to fetch friends' });
   }
@@ -339,3 +343,27 @@ export async function authenticate(req, reply) {
     reply.code(401).send({ error: 'Unauthorized' });
   }
 }
+
+export async function challengeRespond(req, reply) {
+	const { friendUsername } = req.body;
+
+	if (!friendUsername) return 404;
+
+	try {
+		const friend = await User.findOne({ where: { username: friendUsername } });
+		if (!friend) throw 1;
+		const friendSocketId = req.server.onlineUsers.get(friend.id);
+		if (friendSocketId) {
+			req.server.io.to(friendSocketId).emit("challenge", {
+			from: req.user.username,
+			to: friend.username
+			});
+  		}
+    	reply.send({ message: 'Challenge accepted' });
+	}
+	catch {
+    	reply.code(401).send({ error: 'Unauthorized' });
+	}
+}
+
+
