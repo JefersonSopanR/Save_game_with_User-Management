@@ -74,8 +74,9 @@ socket.on('connect_error', (err) => {
     alert('Authentication required. Please log in.');
     window.location.href = '/login.html';
 });
-socket.on("gameEnded", (data) => {
-    //alert(`Game Over! ${data.winner} wins with score: ${data.finalScore}`);
+socket.on("gameEnded", (roomIdDeleted) => {
+    roomId = null;
+    gameState = null;
 });
 // ✅ Close modal if the server says the game was closed
 socket.on("gameClosed", (data) => {

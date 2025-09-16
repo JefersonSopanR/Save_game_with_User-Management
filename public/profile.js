@@ -234,20 +234,6 @@ async function loadMatchHistory() {
         console.error('Failed to load match history:', error);
     }
 }
-async function logoutProfile() {
-    const token = localStorage.getItem('token');
-    try {
-        await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-    }
-    catch (error) {
-        console.error('Logout error:', error);
-    }
-    localStorage.removeItem('token');
-    window.location.href = '/login.html';
-}
 // Handle avatar upload
 function initializeAvatarUpload() {
     const avatarInput = document.getElementById('avatarInput');
@@ -293,7 +279,6 @@ function initializeAvatarUpload() {
 // Make functions available globally
 window.loadProfile = loadProfile;
 window.updateProfile = updateProfile;
-window.logout = logoutProfile;
 window.changePassword = changePassword;
 window.checkStrength = checkStrength;
 window.showPasswordMessage = showPasswordMessage;

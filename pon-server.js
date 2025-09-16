@@ -412,12 +412,12 @@ async function updateGame(gameState, roomId) {
     if (gameState.ball.x < 0) { 
         gameState.player2.score++; 
         resetBall(gameState);
-        if (gameState.player2.score >= 2) gameEnded = true;
+        if (gameState.player2.score >= 5) gameEnded = true;
     }
     else if (gameState.ball.x > 800) { 
         gameState.player1.score++; 
         resetBall(gameState);
-        if (gameState.player1.score >= 2) gameEnded = true;
+        if (gameState.player1.score >= 5) gameEnded = true;
     }
 
     // Save match when game ends
@@ -455,6 +455,7 @@ async function updateGame(gameState, roomId) {
                 await loserUser.update({ losses: loserUser.losses + 1 });
             }
         }
+		io.to(roomId).emit("gameEnded", roomId);
 		delete gameRooms[roomId];
 		releaseRoomId(roomId);
 		console.log(`🗑️ Room ${roomId} deleted`);

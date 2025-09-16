@@ -40,5 +40,4 @@ declare function updateProfile(): Promise<void>;
 declare function ShowFriendProfile(friendId: number): void;
 declare function loadFriends(): Promise<void>;
 declare function loadMatchHistory(): Promise<void>;
-declare function logoutProfile(): Promise<void>;
 declare function initializeAvatarUpload(): void;

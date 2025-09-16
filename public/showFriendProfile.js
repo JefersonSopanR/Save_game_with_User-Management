@@ -21,13 +21,14 @@ async function loadFriendProfile() {
         const profileDiv = document.getElementById('friendProfile');
         if (!profileDiv)
             return;
+        const status = friend.isOnline ? "online" : "offline";
         // Render profile card
         profileDiv.innerHTML = `
 			<div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md mx-auto mt-8">
 				<h2 class="text-2xl font-bold text-pong-green mb-4">
 					${friend.displayName || friend.username}
 				</h2>
-				<p class="text-gray-400 mb-2">Status: ${friend.status}</p>
+				<p class="text-gray-400 mb-2">Status: ${status}</p>
 				<p class="text-gray-400 mb-2">Email: ${friend.email || 'Hidden'}</p>
 
 				<h2 class="text-2xl font-bold text-pong-green mt-8 mb-4">Match History</h2>

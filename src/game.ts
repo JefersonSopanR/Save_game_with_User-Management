@@ -143,8 +143,9 @@ socket.on('connect_error', (err: Error) => {
     window.location.href = '/login.html';
 });
 
-socket.on("gameEnded", (data: GameEndData) => {
-    //alert(`Game Over! ${data.winner} wins with score: ${data.finalScore}`);
+socket.on("gameEnded", (roomIdDeleted: string) => {
+    roomId = null;
+	gameState = null;
 });
 
 // ✅ Close modal if the server says the game was closed

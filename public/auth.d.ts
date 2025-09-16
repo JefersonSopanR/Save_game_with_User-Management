@@ -11,4 +11,4 @@ interface LoginResponse {
 }
 declare function checkAuthToken(): Promise<boolean>;
 declare function checkAuth(): Promise<void>;
-declare function logoutUser(): void;
+declare function logoutUser(): Promise<void>;

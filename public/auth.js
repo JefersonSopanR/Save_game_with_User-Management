@@ -43,7 +43,17 @@ async function checkAuth() {
         }
     }
 }
-function logoutUser() {
+async function logoutUser() {
+    const token = localStorage.getItem('token');
+    try {
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+    }
+    catch (error) {
+        console.error('Logout error:', error);
+    }
     localStorage.removeItem('token');
     window.location.href = '/login.html';
 }

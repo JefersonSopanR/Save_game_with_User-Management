@@ -297,20 +297,6 @@ async function loadMatchHistory(): Promise<void> {
     }
 }
 
-async function logoutProfile(): Promise<void> {
-    const token = localStorage.getItem('token');
-    try {
-        await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-    } catch (error) {
-        console.error('Logout error:', error);
-    }
-    localStorage.removeItem('token');
-    window.location.href = '/login.html';
-}
-
 // Handle avatar upload
 function initializeAvatarUpload(): void {
     const avatarInput = document.getElementById('avatarInput') as HTMLInputElement;
@@ -357,7 +343,6 @@ function initializeAvatarUpload(): void {
 // Make functions available globally
 (window as any).loadProfile = loadProfile;
 (window as any).updateProfile = updateProfile;
-(window as any).logout = logoutProfile;
 (window as any).changePassword = changePassword;
 (window as any).checkStrength = checkStrength;
 (window as any).showPasswordMessage = showPasswordMessage;
