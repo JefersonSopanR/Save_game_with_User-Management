@@ -272,7 +272,8 @@ io.on("connection", (socket) => {
 				isPlayer1: false,
 				requestedRoomId,
 				playersInRoom: room.players.length,
-				message: `Room ${requestedRoomId} - You are Player "2"}`
+				message: `Room ${requestedRoomId} - You are Player "2"}`,
+				aiEnabled: room.aiEnabled
 			});
 
 			socket.emit("lobbyUpdate", getLobbyInfo());
@@ -291,7 +292,9 @@ io.on("connection", (socket) => {
 				roomId: requestedRoomId,
 				status: "roomFull",
 				message: `The ${requestedRoomId} is full!`,
-				isPlayer1: false })
+				isPlayer1: false,
+				aiEnabled: false
+				 })
 				console.log("checking RoomStatus: ->roomFull");
 				return ;
 			}
@@ -307,7 +310,8 @@ io.on("connection", (socket) => {
 					roomId: requestedRoomId,
 					status: "updateRoom",
 					message: `You are in the ${requestedRoomId}!`,
-					isPlayer1: existingPlayer.isPlayer1
+					isPlayer1: existingPlayer.isPlayer1,
+					aiEnabled: checkRoom.aiEnabled
 				});
 				console.log("checking RoomStatus: ->updateRoom");
 				return ;
@@ -358,7 +362,8 @@ io.on("connection", (socket) => {
 			isPlayer1,
 			roomId,
 			playersInRoom: room.players.length,
-			message: `Room ${roomId} - You are Player ${isPlayer1 ? "1" : "2"}`
+			message: `Room ${roomId} - You are Player ${isPlayer1 ? "1" : "2"}`,
+			aiEnabled: room.aiEnabled
 		});
 
 		if (mode === "AI") {
@@ -413,7 +418,7 @@ io.on("connection", (socket) => {
 			socket.to(roomId).emit("opponentDisconnected", {
 				message: "⚠️ Opponent disconnected. Waiting 10s for them to return..."
 			});
-			//room.players = room.players.filter(p => p.userId !== player.userId);
+			room.players = room.players.filter(p => p.userId !== player.userId);
 
 			if (room.players.length === 0) {
 				delete gameRooms[roomId];

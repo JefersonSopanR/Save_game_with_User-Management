@@ -31,6 +31,7 @@ interface PlayerAssignment {
   isPlayer1: boolean;
   roomId: string;
   message: string;
+  aiEnabled: boolean
 }
 
 interface GameMessage {
@@ -47,6 +48,8 @@ interface Roomstatus {
 	status: string,
 	message: string,
 	isPlayer1: boolean
+	aiEnabled: boolean
+
 }
 
 interface GameReset {
@@ -71,6 +74,18 @@ socket.on("checkRoomStatus", (roomState: Roomstatus) => {
 		const playerInfoElement = document.getElementById('playerInfo');
 		if (playerInfoElement) {
 			playerInfoElement.textContent = `You are in the ${roomId}!`;
+		}
+		if (roomState.aiEnabled === false) {
+			const levelDifficulty: any = document.getElementById("levelDifficulty");
+        	if (levelDifficulty) {
+				levelDifficulty.style.display = "none";
+			}
+		}
+		else if (roomState.aiEnabled === true) {
+			const levelDifficulty: any = document.getElementById("levelDifficulty");
+        	if (levelDifficulty) {
+				levelDifficulty.style.display = "flex";
+			}
 		}
 	}
 })
@@ -187,6 +202,18 @@ socket.on('playerAssignment', (data: PlayerAssignment) => {
     if (playerInfoElement) {
         playerInfoElement.textContent = data.message;
     }
+	if (data.aiEnabled === true) {
+		const levelDifficulty: any = document.getElementById("levelDifficulty");
+		if (levelDifficulty) {
+			levelDifficulty.style.display = "flex";
+		}
+	}
+	else {
+		const levelDifficulty: any = document.getElementById("levelDifficulty");
+		if (levelDifficulty) {
+			levelDifficulty.style.display = "none";
+		}
+	}
 });
 
 socket.on('gameReady', (data: GameMessage) => {

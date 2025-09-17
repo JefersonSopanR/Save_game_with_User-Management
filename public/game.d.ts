@@ -26,6 +26,7 @@ interface PlayerAssignment {
     isPlayer1: boolean;
     roomId: string;
     message: string;
+    aiEnabled: boolean;
 }
 interface GameMessage {
     message: string;
@@ -39,6 +40,7 @@ interface Roomstatus {
     status: string;
     message: string;
     isPlayer1: boolean;
+    aiEnabled: boolean;
 }
 interface GameReset {
     message: string;

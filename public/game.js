@@ -15,6 +15,18 @@ socket.on("checkRoomStatus", (roomState) => {
         if (playerInfoElement) {
             playerInfoElement.textContent = `You are in the ${roomId}!`;
         }
+        if (roomState.aiEnabled === false) {
+            const levelDifficulty = document.getElementById("levelDifficulty");
+            if (levelDifficulty) {
+                levelDifficulty.style.display = "none";
+            }
+        }
+        else if (roomState.aiEnabled === true) {
+            const levelDifficulty = document.getElementById("levelDifficulty");
+            if (levelDifficulty) {
+                levelDifficulty.style.display = "flex";
+            }
+        }
     }
 });
 socket.on("chooseOpponent", () => {
@@ -112,6 +124,18 @@ socket.on('playerAssignment', (data) => {
     const playerInfoElement = document.getElementById('playerInfo');
     if (playerInfoElement) {
         playerInfoElement.textContent = data.message;
+    }
+    if (data.aiEnabled === true) {
+        const levelDifficulty = document.getElementById("levelDifficulty");
+        if (levelDifficulty) {
+            levelDifficulty.style.display = "flex";
+        }
+    }
+    else {
+        const levelDifficulty = document.getElementById("levelDifficulty");
+        if (levelDifficulty) {
+            levelDifficulty.style.display = "none";
+        }
     }
 });
 socket.on('gameReady', (data) => {
