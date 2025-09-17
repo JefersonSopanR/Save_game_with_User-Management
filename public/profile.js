@@ -192,7 +192,7 @@ async function loadFriends() {
         friendsList.innerHTML = '';
         if (data.friends && data.friends.length > 0) {
             data.friends.forEach(friend => {
-                if (friend.challenge === "off") {
+                if (friend.challenge !== "" && friend.challenge !== friend.username) {
                     const friendElement = document.createElement('div');
                     friendElement.className = 'friend-item bg-indigo-600 p-3 rounded-lg flex justify-between items-center';
                     friendElement.innerHTML = `

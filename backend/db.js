@@ -51,8 +51,8 @@ export const Friendship = sequelize.define('Friendship', {
     defaultValue: 'pending' 
   },
   challenge: {
-	type: DataTypes.ENUM('on', 'off'),
-	defaultValue: 'off'
+	type: DataTypes.STRING,
+	defaultValue: ""
   }
 });
 

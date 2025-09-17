@@ -298,12 +298,9 @@ export async function getFriends(req, reply) {
       ]
     });
 
-	const challenge = "off";
     const friends = friendships.map(friendship => {
       const friend = friendship.userId === req.user.id ? friendship.Friend : friendship.User;
-	  if (friendship.challenge !== 'off')
-			challenge = "on";
-	  return {...friend.toJSON(), challenge};
+	  return {...friend.toJSON(), challenge: friendship.challenge};
     });
 
     reply.send( {friends} );
@@ -344,29 +341,44 @@ export async function authenticate(req, reply) {
   }
 }
 
-export async function challengeRespond(req, reply) {
+export async function challenge(req, reply) {
 	const { friendUsername } = req.body;
 
-	if (!friendUsername) return 404;
+	if (!friendUsername) reply.code(404).send({ error: 'User not found' });
 
 	try {
 		const friend = await User.findOne({ where: { username: friendUsername } });
 		if (!friend) throw 1;
-		const friendSocketId = req.server.onlineUsers.get(friend.id);
-		if (friendSocketId) {
-			req.server.io.to(friendSocketId).emit("challenge", {
-			from: req.user.username,
-			to: friend.username
-			});
-  		}
-    	reply.send({ message: 'Challenge accepted' });
+		const friendshipRow = await Friendship.findOne({
+			where: {
+				[Op.or]: [
+					{ userId: req.user.id, friendId: friend.id },
+					{ userId: friend.id, friendId: req.user.id }
+				]
+			}
+		});
+		if (!friendshipRow) return reply.code(404).send({ error: 'Friendship not found' });
+		await friendshipRow.update({challenge: friend.username});
+		reply.send({ message: 'Challenge Friend request sent successfully' });
+
 	}
 	catch {
-    	reply.code(401).send({ error: 'Unauthorized' });
+		reply.code(500).send({ error: 'Failed to sent challenge to a friend' });
 	}
 }
 
 export async function respondChallenge(req, reply) {
-	
+	const { friendUsername } = req.body;
+	console.log(friendUsername, "88888888888888888888888888888888888888888888888888888")
+
+	try {
+		const friend = await User.findOne({where: {username: friendUsername}});
+		if (!friend) reply.code(404).send({ error: 'User not found' });
+
+	}
+	catch {
+		reply.code(500).send({ error: 'Failed to sent challenge to a friend' });
+
+	}
 }
 
