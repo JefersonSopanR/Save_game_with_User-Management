@@ -173,7 +173,10 @@ async function acceptChallenge(friendUsername) {
             body: JSON.stringify({ friendUsername }),
         });
         if (response.ok)
-            console.log("succes!!!");
+            console.log("succes!!!0000000000000000000000000000000000000000000000000000000000000000000000000");
+        const data = await response.json();
+        console.log(`id: ${data.id} /*/*/*/*/ userID: ${data.userId}`);
+        socket.emit("joinRoom", `${data.username} vs ${data.myUsername}`, false, { mode: "NOTHING" }, { player1: data.id, player2: data.userId });
     }
     catch (error) {
         console.error('Failed to load friends:', error);

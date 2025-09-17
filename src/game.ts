@@ -88,12 +88,12 @@ socket.on("chooseOpponent", () => {
     yesBtn.onclick = () => {
         const levelDifficulty: any = document.getElementById("levelDifficulty");
         levelDifficulty.style.display = "flex";
-        socket.emit("joinRoom", null, true, {mode: "AI"});
+        socket.emit("joinRoom", null, true, {mode: "AI"}), null;
         modal.style.display = "none";
     };
 
     noBtn.onclick = () => {
-        socket.emit("joinRoom", null, true, {mode: "PVP"});
+        socket.emit("joinRoom", null, true, {mode: "PVP"}, null);
         modal.style.display = "none";
     };
 });
@@ -126,14 +126,14 @@ socket.on("lobbyUpdate", (rooms: LobbyRoom[]) => {
             const btn = document.createElement("button");
             btn.textContent = `${room.roomId} (${room.players}/2)`;
 		
-            btn.onclick = () => socket.emit("joinRoom", room.roomId, true, {mode: "NOTHING"});
+            btn.onclick = () => socket.emit("joinRoom", room.roomId, true, {mode: "NOTHING"}, null);
             lobbyDiv.appendChild(btn);
         });
     }
 
     const createBtn = document.createElement("button");
     createBtn.textContent = "➕ Create New Room";
-    createBtn.onclick = () => socket.emit("joinRoom", null, false, {mode: "NOTHING"});
+    createBtn.onclick = () => socket.emit("joinRoom", null, false, {mode: "NOTHING"}, null);
     lobbyDiv.appendChild(createBtn);
 });
 

@@ -127,7 +127,7 @@ function createGameState() {
 
 //entries is a method of Object that returns an array of [key, value] pairs for all properties in an object.
 function getLobbyInfo() {
-//console.log(Object.entries(gameRooms))
+console.log(Object.entries(gameRooms))
     return Object.entries(gameRooms).map(([id, room]) => ({
         roomId: id,
         players: room.players.length
@@ -238,7 +238,7 @@ app.decorate('onlineUsers', new Map()); // userId -> socketId
 
 // Socket.IO connection
 io.on("connection", (socket) => {
-    console.log("🎮 Player connected:", socket.user.username);
+    console.log("🎮 Player connected:", socket.user.username, socket.user.id);
 
      const userId = socket.user.id; // assuming you decode token
      app.onlineUsers.set(userId, socket.id);
@@ -249,8 +249,35 @@ io.on("connection", (socket) => {
     // Send current lobby info
     socket.emit("lobbyUpdate", getLobbyInfo());
 
-    socket.on("joinRoom", (requestedRoomId, startGame, { mode }) => {
+    socket.on("joinRoom", (requestedRoomId, startGame, { mode }, challengeRoom) => {
 
+		if (challengeRoom) {
+			console.log(requestedRoomId);
+			gameRooms[requestedRoomId] = {
+				players: [],
+				gameState: createGameState(),
+				startTime: Date.now(),
+				aiEnabled: false,
+				aiDifficulty: "medium"
+				
+			}
+			const room = gameRooms[requestedRoomId];
+			socket.join(requestedRoomId);
+			room.players.push({ id: socket.id, isPlayer1: true, userId: challengeRoom.player1 });
+			socket.roomId = requestedRoomId;
+			room.players.push({ id: 0, isPlayer1: false, userId: challengeRoom.player2 });
+
+			socket.emit("gameUpdate", room.gameState);
+			socket.emit("playerAssignment", {
+				isPlayer1: false,
+				requestedRoomId,
+				playersInRoom: room.players.length,
+				message: `Room ${requestedRoomId} - You are Player "2"}`
+			});
+
+			socket.emit("lobbyUpdate", getLobbyInfo());
+			return;
+		}
 		if (!startGame) {
 			socket.emit("chooseOpponent");
 			return ;
@@ -386,7 +413,7 @@ io.on("connection", (socket) => {
 			socket.to(roomId).emit("opponentDisconnected", {
 				message: "⚠️ Opponent disconnected. Waiting 10s for them to return..."
 			});
-			room.players = room.players.filter(p => p.userId !== player.userId);
+			//room.players = room.players.filter(p => p.userId !== player.userId);
 
 			if (room.players.length === 0) {
 				delete gameRooms[roomId];

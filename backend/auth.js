@@ -373,8 +373,22 @@ export async function respondChallenge(req, reply) {
 
 	try {
 		const friend = await User.findOne({where: {username: friendUsername}});
+		const me = await User.findByPk(req.user.id)
+		if (!me) reply.code(404).send({ error: 'User not found' });
 		if (!friend) reply.code(404).send({ error: 'User not found' });
-
+		const friendshipRow = await Friendship.findOne({
+			where: {
+				[Op.or]: [
+					{ userId: req.user.id, friendId: friend.id },
+					{ userId: friend.id, friendId: req.user.id }
+				]
+			}
+		});
+		if (!friendshipRow) return reply.code(404).send({ error: 'Friendship not found' });
+		await friendshipRow.update({challenge: ""});
+		const myUsername = me.username;
+		console.log(friendUsername, "respondChallenge AFTEER UPDATING!!!1111111111111111111111111111111111111111111111111111111111111")
+		reply.send({ ...friend.toJSON(), userId: req.user.id, myUsername});
 	}
 	catch {
 		reply.code(500).send({ error: 'Failed to sent challenge to a friend' });

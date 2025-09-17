@@ -32,6 +32,12 @@ interface MatchHistoryResponse {
 interface FriendsResponse {
     friends: Friend[];
 }
+interface FriendChallengeAccept {
+    id: number;
+    userId: number;
+    username: string;
+    myUsername: string;
+}
 declare let currentUser: UserProfile;
 declare function loadProfile(): Promise<void>;
 declare function showPasswordMessage(message: string, type: "success" | "error"): void;
