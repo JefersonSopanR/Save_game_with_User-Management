@@ -87,16 +87,10 @@ socket.on('connect_error', (err) => {
     window.location.href = '/login.html';
 });
 socket.on("gameEnded", (roomIdDeleted) => {
-    roomId = null;
-    gameState = null;
-});
-// ✅ Close modal if the server says the game was closed
-socket.on("gameClosed", (data) => {
-    const modal = document.getElementById("continueModal");
-    if (modal)
-        modal.style.display = "none"; // hide modal if still open
-    alert(data.message);
-    // reset UI back to lobby, if you want
+    if (roomId === roomIdDeleted) {
+        roomId = null;
+        gameState = null;
+    }
 });
 socket.on('playerDisconnected', (data) => {
     const playerInfoElement = document.getElementById('playerInfo');

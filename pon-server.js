@@ -418,7 +418,6 @@ io.on("connection", (socket) => {
 			socket.to(roomId).emit("opponentDisconnected", {
 				message: "⚠️ Opponent disconnected. Waiting 10s for them to return..."
 			});
-			room.players = room.players.filter(p => p.userId !== player.userId);
 
 			if (room.players.length === 0) {
 				delete gameRooms[roomId];
