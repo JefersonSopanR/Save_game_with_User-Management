@@ -90,7 +90,13 @@ app.post('/api/user/friend-response', { preHandler: authenticate }, respondToFri
 app.get('/api/user/match-history', { preHandler: authenticate }, getMatchHistory);
 
 // Create Socket.IO server
-const io = new Server(app.server);
+const io = new Server(app.server, {
+    cors: {
+        origin: 'http://localhost:2323',
+        methods: ["GET", "POST"]
+    }
+});
+
 app.decorate('io', io);
 
 // Game rooms
